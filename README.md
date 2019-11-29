@@ -10,24 +10,24 @@ The results are for the [dataset](https://www.kaggle.com/zynicide/wine-reviews#w
 
 ## Main results
 
-Our [train dataset](https://github.com/agombert/textcat/data/Text_train.npy) has a length 53920. It's balanced between the four classes. The [test dataset](https://github.com/agombert/textcat/data/Text_test.npy) has a length 23104. 
+Our [train dataset](https://github.com/agombert/textcat/data/Text_train.npy) has a length 4000. It's balanced between the four classes. The [test dataset](https://github.com/agombert/textcat/data/Text_test.npy) has a length 4000. Thus we will be able to see the difference with the transfert learning method (BERT fine tuning).
 
-For each algorithm I trained for 30 epochs with batch size 128 and a dropout at 0.5. 
+For each algorithm I trained for 15 epochs with batch size 32 and a dropout at 0.5. 
 
 I computed the accuracy and the macro recall / macro precision for each model.
 
 |      Model     | Accuracy | Recall | Precision | Model Size|
 |:--------------:|:--------:|:------:|:---------:|:---------:|
-| *spaCy CNN*    |  59.99%  | 59.99% |   59.00%  |   5.3Mb   |
-|*BERT FineTuned*|        |      |           |           |
+| *spaCy CNN*    |  47.45%  | 47.45% |   52.38%  |   5.3Mb   |
+|*BERT FineTuned*|  58.03%  | 58.03% |   61.15%  |   1.2Gb   |
 |*Distilled BERT*|        |      |           |           |
 
 I also computed the recall/precision for each class. 
 
 |      Model     | Recall 0 | Precision 0 | Recall 1 | Precision 1 | Recall 2 | Precision 2 | Recall 3 | Precision 3 |
 |:--------------:|:--------:|:-----------:|:--------:|:-----------:|:--------:|:-----------:|:--------:|:-----------:|
-|*spaCy CNN*     |  38.09%  |    47.38%   |  45.45%. |   50.40%    |  74.43%  |   75.69%    |  82.01%  |   62.55%    |
-|*BERT FineTuned*|        |      |           |           |
+|*spaCy CNN*     |58.30%|35.55%|35.50%|39.10%|46.30%|75.78%|49.70%|59.10%|
+|*BERT FineTuned*|65.40%|80.54%|55.60%|49.12%|56.20%|43.74%|54.90%|71.21%|
 |*Distilled BERT*|        |      |           |           |
 
 ## Data
@@ -80,14 +80,26 @@ And you'll get the evaluations in logs.
 
 ## BERT textcat implementation (with google Colab)
 
+For this part I used google colab, as it's really cool to get free GPU access and perform BERT fine tuning on small datasets. I I used the code from this [colab](https://colab.research.google.com/github/google-research/bert/blob/master/predicting_movie_reviews_with_bert_on_tf_hub.ipynb#scrollTo=dsBo6RCtQmwx) which uses BERT to review movies. I aranged a bit the code to adapt it to my problem. 
+
+The code is [here](https://colab.research.google.com/drive/1MShG1gDV5TfvVEYDTBgr5LCzVNVmTf03#scrollTo=NwW9OH0CBJx9&uniqifier=1), and adapting to your problem you can use it for any text classification by fine tuning BERT. 
+
+You just follow each cell, but previously you'll need some storage ([GCS](https://console.cloud.google.com/storage) for instance) to store the results and your datasets. 
+
 ## BERT distillation implementation
 
-### Data Augmentation
+### [Data Augmentation](https://arxiv.org/abs/1503.02531)
 
-You can use google colab once again or you can do it in local and stock your augmented data in the bucket you previusly created. I used google colab as I did not install the `gsutil` functions in local. 
+For the augmented data we follow two out of three methods from [Distilling Task-Specific Knowledge from BERT intoSimple Neural Networks](https://arxiv.org/pdf/1903.12136.pdf). We mask some tokens and also change the order of randomly chosen n-grams in the sentence. At the end we go from 4k to 200k data for our augmented set.
+
+You can use google colab once again or you can do it in local and stock your augmented data in the bucket you previously created. 
 
 https://colab.research.google.com/drive/128apJ8WAMVyXxocCY9CRapsr1Qs8Mu0w#scrollTo=zXkPH_rUatS6
 
-
+You can also perform this code locally to get 50 times more data. Then we will use the previously trained model to compute the prevision for the augmented data and also the probabilities associated at each text. 
 
 ### Training on augmented data
+
+When you have your augmented data and also the BERT predictions on those data (labels and probabilities) we are going to train a new model from spaCy on those data.
+
+First we use only the labels predicted by the BERT fineted model. So we use exactly the same method as in the section on spaCy textcat. 
