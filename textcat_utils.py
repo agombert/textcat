@@ -222,16 +222,19 @@ def get_results(y_true, y_pred):
     
     m = len(np.unique(y_true))
     
-    results['acc'] = np.sum([cm[i, i] for i in range(m)]) / np.sum(cm)
+    FP = cm.sum(axis=0) - np.diag(cm)  
+    FN = cm.sum(axis=1) - np.diag(cm)
+    TP = np.diag(cm)
+    
+    results['acc'] = np.sum(TP) / np.sum(cm)
 
     for i in range(m):
-        results['recall_{}'.format(i+1)] = cm[i, i] / np.sum(cm[i,:])
-        results['precision_{}'.format(i+1)] = cm[i, i] / np.sum(cm[:,i])
-
-    results['recall'] = np.average([results['recall_{}'.format(i)] for i in range(1, m+1)], 
-                                   weights = [np.sum(cm[i,:]) for i in range(m)])
-    results['precision'] = np.average([results['precision_{}'.format(i)] for i in range(1, m+1)], 
-                                   weights = [np.sum(cm[i,:]) for i in range(m)])
+        results['recall_{}'.format(i+1)] = TP[i] / (TP[i] + FN[i])
+        results['precision_{}'.format(i+1)] = TP[i] / (TP[i] + FP[i])
+    
+    results['recall'] = np.mean([results.get('recall_{}'.format(i+1)) for i in range(m)])
+    
+    results['precision'] = np.mean([results.get('precision_{}'.format(i+1)) for i in range(m)])
     
     return results
     
