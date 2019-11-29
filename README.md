@@ -6,7 +6,7 @@ In this repo, I constructed a quick overview/tutorial to classify texts. We go o
 2. [Fine tune BERT](https://github.com/google-research/bert#fine-tuning-with-bert) to create a more efficient classifier
 3. [Distill](https://arxiv.org/pdf/1503.02531.pdf) the BERT algorithm to get an efficient model but lighter than the BERT
 
-The results are for the [dataset](https://www.kaggle.com/zynicide/wine-reviews#winemag-data_first150k.csv) I collected from [kaggle](https://www.kaggle.com/). Nevertheless, you can use this code to perform you own text classification with any dataset in `data/` where the `Text_train.npy` and `Text_test.npy` are arrays of text and `Cat_train.py` and `Cat_test.npy` are arrays of label (with as many label as you want). To perform this go directly to the [*spaCy textcat implementation*](https://github.com/agombert/textcat/README.md#spaCy-textcat-implementation)
+The results are for the [dataset](https://www.kaggle.com/zynicide/wine-reviews#winemag-data_first150k.csv) I collected from [kaggle](https://www.kaggle.com/). Nevertheless, you can use this code to perform you own text classification with any dataset in `data/` where the `Text_train.npy` and `Text_test.npy` are arrays of text and `Cat_train.py` and `Cat_test.npy` are arrays of label (with as many label as you want). To perform this go directly to the [*spaCy textcat implementation*](https://github.com/agombert/textcat/blob/master/README.md#spacy-textcat-implementation)
 
 ## Main results
 
