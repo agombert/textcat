@@ -12,7 +12,7 @@ The results are for the [dataset](https://www.kaggle.com/zynicide/wine-reviews#w
 
 Our [train dataset](https://github.com/agombert/textcat/data/Text_train.npy) has a length 53920. It's balanced between the four classes. The [test dataset](https://github.com/agombert/textcat/data/Text_test.npy) has a length 23104. 
 
-For each algorithm I trained for 10 epochs with batch size 32 and a dropout at 0.5. 
+For each algorithm I trained for 30 epochs with batch size 128 and a dropout at 0.5. 
 
 I computed the accuracy and the macro recall / macro precision for each model.
 
@@ -83,5 +83,11 @@ And you'll get the evaluations in logs.
 ## BERT distillation implementation
 
 ### Data Augmentation
+
+You can use google colab once again or you can do it in local and stock your augmented data in the bucket you previusly created. I used google colab as I did not install the `gsutil` functions in local. 
+
+https://colab.research.google.com/drive/128apJ8WAMVyXxocCY9CRapsr1Qs8Mu0w#scrollTo=zXkPH_rUatS6
+
+
 
 ### Training on augmented data
