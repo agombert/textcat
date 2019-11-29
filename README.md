@@ -52,7 +52,7 @@ When you have your dataset with the texts and labels you can use `run_textcat.py
 Save your train test in `data/` with a name followed by the mention `_train` with a `.npy` format (with numpy.save) and your test set with the mention `_test` with the same extention `.npy`.
 
 
-```python
+```bash
 python3 run_textcat.py --is predict False
                        --name_model name_of_model
                        --cats cat1 cat2 cat3 ...
@@ -69,7 +69,7 @@ Your model will be save in `models/` with one file `name_of_model_nlp` which is 
 
 Then you can use the same function to get metrics on the test dataset:
 
-```python
+```bash
 python3 run_textcat.py --is predict True
                        --name_model name_of_model
                        --X name of features data (without _test)
