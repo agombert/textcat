@@ -20,7 +20,7 @@ I computed the accuracy and the macro recall / macro precision for each model.
 |:--------------:|:--------:|:------:|:---------:|:---------:|
 | *spaCy CNN*    |  47.45%  | 47.45% |   52.38%  |   5.3Mb   |
 |*BERT FineTuned*|  58.03%  | 58.03% |   61.15%  |   1.2Gb   |
-|*Distilled BERT*|        |      |           |           |
+|*Distilled BERT*|  51.85%  | 51.85% |   53.29%  |   6.2MB   |
 
 I also computed the recall/precision for each class. 
 
@@ -28,7 +28,7 @@ I also computed the recall/precision for each class.
 |:--------------:|:--------:|:-----------:|:--------:|:-----------:|:--------:|:-----------:|:--------:|:-----------:|
 |*spaCy CNN*     |58.30%|35.55%|35.50%|39.10%|46.30%|75.78%|49.70%|59.10%|
 |*BERT FineTuned*|65.40%|80.54%|55.60%|49.12%|56.20%|43.74%|54.90%|71.21%|
-|*Distilled BERT*|        |      |           |           |
+|*Distilled BERT*|46.40%|39.36%|43.20%|43.03%|59.40%|70.38%|58.40%|60.02%|
 
 ## Data
 
@@ -103,3 +103,5 @@ You can also perform this code locally to get 50 times more data. Then we will u
 When you have your augmented data and also the BERT predictions on those data (labels and probabilities) we are going to train a new model from spaCy on those data.
 
 First we use only the labels predicted by the BERT fineted model. So we use exactly the same method as in the section on spaCy textcat. 
+
+We outperformed first model from 4.5% ! We still are below the BERT from a significagive margin, but we should add the loig probs to the loss function to try to improve the model. And the size of the model is a bit higher from the first textcat spaCy classifier we had. 
