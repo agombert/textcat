@@ -6,9 +6,11 @@ In this repo, I constructed a quick overview/tutorial to classify texts. We go o
 2. [Fine tune BERT](https://github.com/google-research/bert#fine-tuning-with-bert) to create a more efficient classifier
 3. [Distill](https://arxiv.org/pdf/1503.02531.pdf) the BERT algorithm to get an efficient model but lighter than the BERT
 
-The results are for the [dataset](https://www.kaggle.com/zynicide/wine-reviews#winemag-data_first150k.csv) I collected from [kaggle](https://www.kaggle.com/). Nevertheless, you can use this code to perform you own text classification with any dataset in `data/` where the `Text_train.npy` and `Text_test.npy` are arrays of text and `Cat_train.py` and `Cat_test.npy` are arrays of label (with as many label as you want). To perform this go directly to the [*spaCy textcat implementation*](https://github.com/agombert/textcat/blob/master/README.md#spacy-textcat-implementation)
+The results are for the [dataset](https://www.kaggle.com/zynicide/wine-reviews#winemag-data_first150k.csv) I collected from [kaggle](https://www.kaggle.com/) and for a [hatred speech dataset](https://github.com/t-davidson/hate-speech-and-offensive-language) I found on github. Nevertheless, you can use this code to perform you own text classification with any dataset in `data/` where the `X_train.npy` and `X_test.npy` are arrays of text and `y_train.py` and `y_test.npy` are arrays of label (with as many label as you want). To perform this go directly to the [*spaCy textcat implementation*](https://github.com/agombert/textcat/blob/master/README.md#spacy-textcat-implementation).
 
 ## Main results
+
+### Wine reviews
 
 Our [train dataset](https://github.com/agombert/textcat/data/Text_train.npy) has a length 4000. It's balanced between the four classes. The [test dataset](https://github.com/agombert/textcat/data/Text_test.npy) has a length 4000. Thus we will be able to see the difference with the transfert learning method (BERT fine tuning).
 
@@ -30,7 +32,31 @@ I also computed the recall/precision for each class.
 |*BERT FineTuned*|65.40%|80.54%|55.60%|49.12%|56.20%|43.74%|54.90%|71.21%|
 |*Distilled BERT*|46.40%|39.36%|43.20%|43.03%|59.40%|70.38%|58.40%|60.02%|
 
+### Hatre Speech detection
+
+Our [train dataset](https://github.com/agombert/textcat/data/HS_X_train.npy) has a length 2145. It's balanced between the three classes. The [test dataset](https://github.com/agombert/textcat/data/HS_X_test.npy) has a length 2145. Thus we will be able to see the difference with the transfert learning method (BERT fine tuning).
+
+For each algorithm I trained for 15 epochs with batch size 32 and a dropout at 0.5. 
+
+I computed the accuracy and the macro recall / macro precision for each model.
+
+|      Model     | Accuracy | Recall | Precision | Model Size|
+|:--------------:|:--------:|:------:|:---------:|:---------:|
+| *spaCy CNN*    |  59.91%  | 59.91% |   60.52%  |   5.3Mb   |
+|*BERT FineTuned*|  81.35%  | 81.35% |   81.58%  |   1.2Gb   |
+|*Distilled BERT*|  72.73%  | 72.73% |   72.35%  |   6.2MB   |
+
+I also computed the recall/precision for each class. 
+
+|      Model     | Recall 0 | Precision 0 | Recall 1 | Precision 1 | Recall 2 | Precision 2 |
+|:--------------:|:--------:|:-----------:|:--------:|:-----------:|:--------:|:-----------:|
+|*spaCy CNN*     |58.74%|53.30%|61.68%|69.78%|59.30%|58.48%|
+|*BERT FineTuned*|90.34%|89.34%|75.25%|82.14%|78.60%|73.27%|
+|*Distilled BERT*|60.14%|68.58%|87.69%|77.22%|70.35%|71.25%|
+
 ## Data
+
+### Wine dataset
 
 For this experiment I used a [dataset of wine reviews](https://www.kaggle.com/zynicide/wine-reviews#winemag-data_first150k.csv) I found on Kaggle. I cut out the dataset depending on the points one gave to a wine. The association label-mark is derived from the quartiles:
 
@@ -44,6 +70,18 @@ For this experiment I used a [dataset of wine reviews](https://www.kaggle.com/zy
 The objective is according to the text, rank the review. In term or real like applications, we can use those kind of algorithms to detect hatred speech on any forum or twitter. We can also use those algorithms to assess the global opinion on a particular subject (movies, policies, branding...). It is classic sentiment analysis. 
 
 Here the difference is that we look at sentiment analysis with more than two labels (0-1) that we can easily find on tutorials.
+
+### Hatred speech dataset
+
+For this experiment I used a [dataset of hatred speech](https://github.com/t-davidson/hate-speech-and-offensive-language) I found on Github. The speech is already labelled with 0 for hatred speech, 1 for offensive speech and 2 for neutral speech. I only managed to anonymized the tweets when there are some mention within the tweet.
+
+|   Class  | Label |
+|:--------:|:-----:|
+| Hatred   | 0     |
+| Offensive| 1     |
+| Neutral  | 2     |
+
+The objective is according to the text, rank the tweet.
 
 ## spaCy textcat implementation
 
@@ -92,9 +130,7 @@ You just follow each cell, but previously you'll need some storage ([GCS](https:
 
 For the augmented data we follow two out of three methods from [Distilling Task-Specific Knowledge from BERT intoSimple Neural Networks](https://arxiv.org/pdf/1903.12136.pdf). We mask some tokens and also change the order of randomly chosen n-grams in the sentence. At the end we go from 4k to 200k data for our augmented set.
 
-You can use google colab once again or you can do it in local and stock your augmented data in the bucket you previously created. 
-
-https://colab.research.google.com/drive/128apJ8WAMVyXxocCY9CRapsr1Qs8Mu0w#scrollTo=zXkPH_rUatS6
+You can use a [google colab notebook](https://colab.research.google.com/drive/128apJ8WAMVyXxocCY9CRapsr1Qs8Mu0w#scrollTo=zXkPH_rUatS6) once again or you can do it in local and stock your augmented data in the bucket you previously created. 
 
 You can also perform this code locally to get 50 times more data. Then we will use the previously trained model to compute the prevision for the augmented data and also the probabilities associated at each text. 
 
@@ -104,4 +140,4 @@ When you have your augmented data and also the BERT predictions on those data (l
 
 First we use only the labels predicted by the BERT fineted model. So we use exactly the same method as in the section on spaCy textcat. 
 
-We outperformed first model from 4.5% ! We still are below the BERT from a significagive margin, but we should add the loig probs to the loss function to try to improve the model. And the size of the model is a bit higher from the first textcat spaCy classifier we had. 
+We outperformed first model by 13% on hatred speech datasets and 4.5% on the wine datasets ! We still are below the BERT from a significagive margin, but we should add the loig probs to the loss function to try to improve the model. And the size of the model is a bit higher from the first textcat spaCy classifier we had. 
