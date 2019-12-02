@@ -235,7 +235,7 @@ def get_results(y_true, y_pred):
     results['recall'] = np.mean([results.get('recall_{}'.format(i+1)) for i in range(m)])
     
     results['precision'] = np.mean([results.get('precision_{}'.format(i+1)) for i in range(m)])
-    
+        
     return results
     
 
