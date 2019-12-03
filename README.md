@@ -1,10 +1,12 @@
-# Text classification: easy implementation, BERT fine tuning and BERT Distillation
+# Text classification: easy implementation, BERT fine tuning, BERT Distillation & TF Hub encoder
 
 In this repo, I constructed a quick overview/tutorial to classify texts. We go over a few methods motivated by an article on [BERT distillation with spaCy](https://towardsdatascience.com/distilling-bert-models-with-spacy-277c7edc426c) and we are going through the three steps of the process:
 
 1. Create a [text classifier](https://github.com/explosion/spaCy/blob/master/examples/training/train_textcat.py) algorithm with spaCy
 2. [Fine tune BERT](https://github.com/google-research/bert#fine-tuning-with-bert) to create a more efficient classifier
 3. [Distill](https://arxiv.org/pdf/1503.02531.pdf) the BERT algorithm to get an efficient model but lighter than the BERT
+
+I also computed the results with the help of [TensorFlow Hub](https://tfhub.dev/). You can connect to this hub and load a [large universal encoder](https://tfhub.dev/google/universal-sentence-encoder-large/4). With this encoder you can encode each of your sentence in a vector of 512 features. And with it add a classifier from [Scikit-learn](https://scikit-learn.org) to create a text classifier in a few lines of codes. Here I used a gradient boosting classifier.
 
 The results are for the [dataset](https://www.kaggle.com/zynicide/wine-reviews#winemag-data_first150k.csv) I collected from [kaggle](https://www.kaggle.com/) and for a [hatred speech dataset](https://github.com/t-davidson/hate-speech-and-offensive-language) I found on github. Nevertheless, you can use this code to perform you own text classification with any dataset in `data/` where the `X_train.npy` and `X_test.npy` are arrays of text and `y_train.py` and `y_test.npy` are arrays of label (with as many label as you want). To perform this go directly to the [*spaCy textcat implementation*](https://github.com/agombert/textcat/blob/master/README.md#spacy-textcat-implementation).
 
@@ -22,7 +24,7 @@ I computed the accuracy and the macro recall / macro precision for each model.
 |:--------------:|:--------:|:------:|:---------:|:---------:|
 | *spaCy CNN*    |  47.45%  | 47.45% |   52.38%  |   5.3Mb   |
 |*BERT FineTuned*|  58.03%  | 58.03% |   61.15%  |   1.2Gb   |
-|*Distilled BERT*|  51.85%  | 51.85% |   53.29%  |   6.2MB   |
+|*Distilled BERT*|  51.85%  | 51.85% |   53.29%  |   6.2MB   | 
 
 I also computed the recall/precision for each class. 
 
@@ -45,6 +47,7 @@ I computed the accuracy and the macro recall / macro precision for each model.
 | *spaCy CNN*    |  59.91%  | 59.91% |   60.52%  |   5.3Mb   |
 |*BERT FineTuned*|  81.35%  | 81.35% |   81.58%  |   1.2Gb   |
 |*Distilled BERT*|  72.73%  | 72.73% |   72.35%  |   6.2MB   |
+|*TFH Encod + GB*|  77.02%  | 77.02% |   76.88%. |   0.5MB*  |
 
 I also computed the recall/precision for each class. 
 
@@ -53,6 +56,10 @@ I also computed the recall/precision for each class.
 |*spaCy CNN*     |58.74%|53.30%|61.68%|69.78%|59.30%|58.48%|
 |*BERT FineTuned*|90.34%|89.34%|75.25%|82.14%|78.60%|73.27%|
 |*Distilled BERT*|60.14%|68.58%|87.69%|77.22%|70.35%|71.25%|
+|*TFH Encod + GB*|86.85%|81.39%|76.50%|74.22%|67.69%|75.04%|
+
+* the size of the model does not take into account the encoder as it has been loaded from the hub and is not saved.
+
 
 ## Data
 
@@ -141,3 +148,17 @@ When you have your augmented data and also the BERT predictions on those data (l
 First we use only the labels predicted by the BERT fineted model. So we use exactly the same method as in the section on spaCy textcat. 
 
 We outperformed first model by 13% on hatred speech datasets and 4.5% on the wine datasets ! We still are below the BERT from a significagive margin, but we should add the loig probs to the loss function to try to improve the model. And the size of the model is a bit higher from the first textcat spaCy classifier we had. 
+
+## TFHub encoder + Gradient Boosting
+
+I was at first wondering how to modify the spaCy loss function to make the textcat algorithm works like a regression on each category. Instead of that I tried to use an encoder from TFHub. 
+
+The [encoder](https://tfhub.dev/google/universal-sentence-encoder-large/4) I used for is well explained on the hub. 
+
+`
+The input is variable length English text and the output is a 512 dimensional vector. The universal-sentence-encoder-large model is trained with a Transformer encoder
+`
+
+Thus by using the encoder on each sentence, without finetuning or new training to focus on our data we can try to classify the text. 
+
+It looks really good as we outperform all the models except the BERT and we are not so far as we are only 4.5% below for the hatred speech and X% for the wine classification.
