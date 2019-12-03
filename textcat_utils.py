@@ -13,6 +13,12 @@ from spacy.pipeline import TextCategorizer
 
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+
+
+import tensorflow_hub as hub
 
 PATH_REPO = getcwd()
 PATH_DATA = join(PATH_REPO, 'data')
@@ -158,7 +164,7 @@ def training(nlp, textcat, train_data, dev_texts, dev_cats, n_iter=10, bs_min=4,
     """
     m = len(textcat.labels)
     
-    other_pipes = [pipe for pipe in nlp.pipe_names if pipe != "textcat"]
+    other_pipes = [pipe for pipe in nlp.pipe_names if pipe not in ["textcat", "sentencizer", "trf_wordpiecer", "trf_tok2vec"]]
     
     scores_ = scores_
     n_old = 0 if len(scores_.keys()) == 0  else min(scores_.keys())
@@ -301,10 +307,11 @@ def evaluate_test(X_test, y_test, textcat, nlp):
     formats2 = ['{:.2f}%\t{:.2f}%'.format(scores["recall_{}".format(i)]*100,
                                       scores["precision_{}".format(i)]*100)
                 for i in range(1, m+1)]
+    
     formats1 = [scores["acc"]*100, 
                 scores["recall"]*100, scores["precision"]*100]
 
-    logging.info("{:.2f}%\t{:.2f}%\t{:.2f}%".format(*formats1) + t.format(*formats2))
+    logging.info("{:.2f}%{:.2f}%\t{:.2f}%".format(*formats1) + t.format(*formats2))
     
     return(scores)
 
@@ -350,3 +357,130 @@ def restore_results(name):
     
     return(nlp, textcat, scores_)
 
+
+def preprocess_tf_hub(X, encoder='https://tfhub.dev/google/universal-sentence-encoder-large/4'):
+    """
+    Objective: Transform an array of sentences into an array of embeddings of length 512
+               from tensorflow_hub, I put as default encoder the Universal Sentence Encoders.
+               "The universal-sentence-encoder-large model is trained with a Transformer encoder."
+    
+    Inputs:
+        - X, np.array 1D: the array to convert in embeddings
+        - encoder, urllink: an url to the encoder we want
+    Outputs:
+        - embedding, np.array: (X.shape[0], 512) array of the embeddings for each sentence
+    """
+    embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder-large/4")
+    
+    embedding = embed(X)['outputs'].numpy()
+    
+    return(embedding)
+
+
+def train_sklearn_model(X, y, model='RF', CV=5, **kwargs):
+    """
+    Objective: train the model with or without cross validation
+    
+    Inputs:
+        - X, np.array: encoded sentences 
+        - y, np.array: the labels for all the sentences
+        - model, str: 'RF' or 'GB' (Random Forest or Gradient Boosting Classifier
+        - CV, int: optionnal, could be put at False if no CV
+        - **kwargs, dict: the dictionary of the CV parameters we want to create
+    Outputs:
+        - clf, sklearn model: the trained model if CV we keep only the best estimator
+    """
+    
+    assert model in ['RF', 'GB'], "ModelError: model should be in ['RF', 'GB']"
+    
+    if model == 'RF':
+        clf = RandomForestClassifier(random_state=0)
+    else:
+        clf = GradientBoostingClassifier(random_state=0)
+        
+    if CV:
+        params = {"max_depth": [3, 2],
+              "n_estimators": range(50, 150, 10)}
+        params = {**params, **kwargs}
+        clf = GridSearchCV(clf, param_grid=params, cv=5)
+        
+    clf.fit(X, y)
+    
+    if CV:
+        clf = clf.best_estimator_
+    
+    logging.info('Training done')
+    
+    return(clf)
+
+
+def test_sklearn_model(X, y, clf):
+    """
+    Objective: test the model on a dataset
+    
+    Inputs:
+        - X, np.array: encoded sentences 
+        - y, np.array: the labels for all the sentences
+        - clf, sklearn model: the trained model to test
+    Outputs:
+        - cm, np.array: the confusion matrix of the model
+        - scores, dict: with as keys/values the recall/precision (micro and macro) and the accuracy of the model
+    """
+    
+    m = len(np.unique(y))
+    
+    y_pred = clf.predict(X)
+    score = clf.score(X, y)
+    
+    cm = confusion_matrix(y, y_pred)
+    
+    scores = get_results(y, y_pred)
+    t = "\t{:^5}"*m
+    formats = ['{:^5}\t{:^5}'.format('R{}'.format(i), 'P{}'.format(i)) 
+               for i in range(1, m+1)]
+
+    logging.info("{:^5}\t{:^5}\t{:^5}".format("Acc", "R", "P") + t.format(*formats))
+            
+    formats2 = ['{:.2f}%\t{:.2f}%'.format(scores["recall_{}".format(i)]*100,
+                                      scores["precision_{}".format(i)]*100)
+                for i in range(1, m+1)]
+    
+    formats1 = [score*100, 
+                scores["recall"]*100, scores["precision"]*100]
+
+    logging.info("{:.2f}%{:.2f}%\t{:.2f}%".format(*formats1) + t.format(*formats2))
+    
+    return(scores, cm)
+
+
+def save_model(name, model, clf):
+    """
+    Objective: save the results we got
+    
+    Inputs:
+        - name, str: the name of the main model
+        - model, str: the type of model
+        - clf, sklearn model: the model we want to save as pickle
+    """
+    
+    pickle.dump(clf, open(join(PATH_REPO, 'models', '{}_{}.pkl'.format(name, model)), 'wb'))
+    
+    logging.info('models saved in {}'.format(join(PATH_REPO, 'models')))
+
+    
+def restore_model(name, model):
+    """
+    Objective: restore old results
+    
+    Inputs:
+        - name, str: the name of the main model
+        - model, str: the type of model
+    Outputs:
+        - clf, sklearn model: the model restored
+    """
+  
+    clf = pickle.load(open(join(PATH_REPO, 'models', '{}_{}.pkl'.format(name, model)), 'rb'))
+    
+    logging.info('models restored from {}'.format(join(PATH_REPO, 'models')) )        
+    
+    return(clf)

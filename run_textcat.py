@@ -11,6 +11,9 @@ if __name__ == "__main__":
     parser.add_argument('--name_model', metavar='n', type=str, default = None, 
                    help='name of already existing model')
     
+    parser.add_argument('--name_lg', metavar='l', type=str, default = None, 
+                   help='name of one specific language spacy')
+    
     parser.add_argument('--cats', metavar='C', type=str, nargs='+',
                    help='categories for your text classifications')
    
@@ -23,13 +26,13 @@ if __name__ == "__main__":
     parser.add_argument('--bs_m', metavar='m', type=int, default=4,
                    help='The minimum batch size for training')
    
-    parser.add_argument('--bs_M', metavar='M', type=str, default='Cat',
+    parser.add_argument('--bs_M', metavar='M', type=int, default=32,
                    help='The maximum batch size for training')
    
     parser.add_argument('--step', metavar='s', type=float, default=1.001,
                    help='The step to go from min batchsize to max batchsize')
    
-    parser.add_argument('--epoch', metavar='e', type=int, default=10,
+    parser.add_argument('--epoch', metavar='e', type=int, default=15,
                    help='Number of epoch for the training')
    
     parser.add_argument('--drop', metavar='d', type=float, default=0.5,
@@ -43,7 +46,7 @@ if __name__ == "__main__":
     try:
         nlp, textcat, scores_ = restore_results(args.name_model)
     except:
-        nlp, textcat, scores_ = load_model_labels(*args.cats)
+        nlp, textcat, scores_ = load_model_labels(*args.cats, **{'model': args.name_lg})
     
     if args.is_predict:
         X, y = load_data('{}_test'.format(args.X), '{}_test'.format(args.y))
