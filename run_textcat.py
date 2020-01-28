@@ -8,6 +8,9 @@ if __name__ == "__main__":
     parser.add_argument('--is_predict', metavar='t', type=bool, default=False,
                    help='whether you want to predict or not')
     
+    parser.add_argument('--is_evaluate', metavar='t', type=bool, default=False,
+                   help='whether you want to evaluate or not')
+    
     parser.add_argument('--name_model', metavar='n', type=str, default = None, 
                    help='name of already existing model')
     
@@ -48,9 +51,13 @@ if __name__ == "__main__":
     except:
         nlp, textcat, scores_ = load_model_labels(*args.cats, **{'model': args.name_lg})
     
-    if args.is_predict:
+    if args.is_evaluate:
         X, y = load_data('{}_test'.format(args.X), '{}_test'.format(args.y))
         evaluate_test(X, y, textcat, nlp)
+    elif args.is_predict:
+        X, y = load_data('{}'.format(args.X))
+        y_pred = predict_output(nlp.tokenizer, textcat, X)
+        save_prediction('{}'.format(args.X), X, y_pred)
     else:
         X, y = load_data('{}_train'.format(args.X), '{}_train'.format(args.y))
         train_data, dev_texts, dev_cats = preprocess_before_training(textcat, X, y, r=0.8)

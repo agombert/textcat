@@ -1,4 +1,4 @@
-from os import getcwd
+from os import path, getcwd
 from os.path import join
 import numpy as np
 import pickle
@@ -17,26 +17,29 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 
-
 import tensorflow_hub as hub
 
-PATH_REPO = getcwd()
+PATH_REPO = path.dirname(getcwd())
 PATH_DATA = join(PATH_REPO, 'data')
 
-def load_data(name_features, name_labels):
+def load_data(name_features, name_labels=False):
     """
     Objective: Load the data, features in X and labels in y
     
     Inputs:
         - name_features, str: the name of the feature file in the data repo
-        - name_labels, str: the name of the label file in the data repo
+        - name_labels, str: the name of the label file in the data repo, False for prediction and not evaluation or train
     Outputs:
         - X, np.array: array of the features for the text (1D with each line a text)
         - y, np.array: array of the labels (1D with each line a label) must be labels of int begining at 0
     """
     X = np.load(join(PATH_DATA, '{}.npy'.format(name_features)), allow_pickle=True)
-    y = np.load(join(PATH_DATA, '{}.npy'.format(name_labels)), allow_pickle=True)
     
+    if name_labels:
+        y = np.load(join(PATH_DATA, '{}.npy'.format(name_labels)), allow_pickle=True)
+    else:
+        y = np.ones(X.shape[0])
+        
     logging.info('Data loaded')
     
     return(X, y)
@@ -279,6 +282,33 @@ def evaluate(tokenizer, textcat, texts, cats):
     return results
 
 
+
+def predict_output(tokenizer, textcat, texts):
+    """
+    Objective: predict the labels on new texts
+    
+    Inputs:
+        - tokenizer, spaCy tokenizer: the tokenizer use in spaCy model
+        - textcat, spaCy pipe component: the textcat pipe into the spaCy model
+        - texts, tuple: the texts to evaluate textcat on
+    Ouputs:
+        - y_pred, np.array: the array of results outputs
+    """
+    
+    docs = (tokenizer(text) for text in texts)
+    docs = textcat.pipe(docs)
+    y_pred = []
+    for i, doc in enumerate(docs):
+        cat = sorted(doc.cats.items(), key=lambda x: x[1], reverse=True)[0][0]
+        y_pred.append(cat)
+        if i < 10:
+            logging.info("Tweets: \n {} \n {}".format(doc.text, cat))
+        
+    y_pred = np.array(y_pred)
+    
+    return y_pred
+
+
 def evaluate_test(X_test, y_test, textcat, nlp):
     """
     Objective: Evaluate the model on a test set
@@ -484,3 +514,19 @@ def restore_model(name, model):
     logging.info('models restored from {}'.format(join(PATH_REPO, 'models')) )        
     
     return(clf)
+
+
+def save_prediction(name, X, y_pred):
+    """
+    Objective: save the results for predictions
+    
+    Inputs:
+        - name, str: the name of the main model
+        - X, np.array: the texts as array
+        - y_pred, np.arrat: the predictions to be saved
+    """
+    
+    to_save = np.concatenate((X.reshape(-1,1), y_pred.reshape(-1,1)), axis=1)
+    np.save(join(PATH_REPO, 'data', 'predictions_{}'.format(name)), to_save)
+    
+    

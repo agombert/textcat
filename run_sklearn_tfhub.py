@@ -6,7 +6,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train or test a model')
     
     parser.add_argument('--is_predict', metavar='t', type=bool, default=False,
-                   help='whether you want to predict or not')
+                   help='whether you want to predict and save predictions')
+    
+    parser.add_argument('--is_evaluate', metavar='t', type=bool, default=False,
+                   help='whether you want to evaluate the model')
     
     parser.add_argument('--name_model', metavar='n', type=str, default = None, 
                    help='name of already existing model')
@@ -44,11 +47,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     
-    if args.is_predict:
+    if args.is_evaluate:
         X, y = load_data('{}_test'.format(args.X), '{}_test'.format(args.y))
         X = preprocess_tf_hub(X)
         clf = restore_model(args.name_model, args.model)
         scores, cm = test_sklearn_model(X, y, clf)
+    elif args.is_predict:
+        X_t, y = load_data('{}'.format(args.X))
+        X = preprocess_tf_hub(X_t)
+        clf = restore_model(args.name_model, args.model)
+        y_pred = clf.predict(X)
+        save_prediction('{}'.format(args.X), X_t, y_pred)
     else:
         X, y = load_data('{}_train'.format(args.X), '{}_train'.format(args.y))
         X = preprocess_tf_hub(X)
