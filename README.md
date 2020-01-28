@@ -84,9 +84,9 @@ For this experiment I used a [dataset of hatred speech](https://github.com/t-dav
 
 |   Class  | Label |
 |:--------:|:-----:|
-| Hatred   | 0     |
+| Hatred   | 2     |
 | Offensive| 1     |
-| Neutral  | 2     |
+| Neutral  | 0     |
 
 The objective is according to the text, rank the tweet.
 
