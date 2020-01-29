@@ -1,5 +1,5 @@
 spacy
-sklearn
+sklearn==0.21.3
 numpy
 tensorflow
 tensorflow_hub
