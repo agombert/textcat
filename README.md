@@ -98,7 +98,8 @@ Save your train test in `data/` with a name followed by the mention `_train` wit
 
 
 ```bash
-python3 run_textcat.py --is predict False
+python3 run_textcat.py --is_evaluate False
+                       --is_predict False
                        --name_model name_of_model
                        --cats cat1 cat2 cat3 ...
                        --X name of features data (without _train)
@@ -115,13 +116,23 @@ Your model will be save in `models/` with one file `name_of_model_nlp` which is 
 Then you can use the same function to get metrics on the test dataset:
 
 ```bash
-python3 run_textcat.py --is predict True
+python3 run_textcat.py --is_evaluate True
                        --name_model name_of_model
                        --X name of features data (without _test)
                        --y name of labels data (without _test)
 ```
 
 And you'll get the evaluations in logs. 
+
+Then when you have a file `new_sample.npy` with a lot of new tweets or review and want to determine the class to the tweet/review you wan directly apply the model you want with the following command line:
+
+```bash
+python3 run_textcat.py --is_predict True
+                       --name_model name_of_model
+                       --X new_sample
+```
+
+You will save a file `predictions_new_sample.npy` in the `data/` directory with as 1st column the reviews/tweets and the second column would be the predictions for the class.
 
 ## BERT textcat implementation (with google Colab)
 
