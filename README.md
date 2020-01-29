@@ -12,28 +12,6 @@ The results are for the [dataset](https://www.kaggle.com/zynicide/wine-reviews#w
 
 ## Main results
 
-### Wine reviews
-
-Our [train dataset](https://github.com/agombert/textcat/data/Text_train.npy) has a length 4000. It's balanced between the four classes. The [test dataset](https://github.com/agombert/textcat/data/Text_test.npy) has a length 4000. Thus we will be able to see the difference with the transfert learning method (BERT fine tuning).
-
-For each algorithm I trained for 15 epochs with batch size 32 and a dropout at 0.5. 
-
-I computed the accuracy and the macro recall / macro precision for each model.
-
-|      Model     | Accuracy | Recall | Precision | Model Size|
-|:--------------:|:--------:|:------:|:---------:|:---------:|
-| *spaCy CNN*    |  47.45%  | 47.45% |   52.38%  |   5.3Mb   |
-|*BERT FineTuned*|  58.03%  | 58.03% |   61.15%  |   1.2Gb   |
-|*Distilled BERT*|  51.85%  | 51.85% |   53.29%  |   6.2MB   | 
-
-I also computed the recall/precision for each class. 
-
-|      Model     | Recall 0 | Precision 0 | Recall 1 | Precision 1 | Recall 2 | Precision 2 | Recall 3 | Precision 3 |
-|:--------------:|:--------:|:-----------:|:--------:|:-----------:|:--------:|:-----------:|:--------:|:-----------:|
-|*spaCy CNN*     |58.30%|35.55%|35.50%|39.10%|46.30%|75.78%|49.70%|59.10%|
-|*BERT FineTuned*|65.40%|80.54%|55.60%|49.12%|56.20%|43.74%|54.90%|71.21%|
-|*Distilled BERT*|46.40%|39.36%|43.20%|43.03%|59.40%|70.38%|58.40%|60.02%|
-
 ### Hatre Speech detection
 
 Our [train dataset](https://github.com/agombert/textcat/data/HS_X_train.npy) has a length 2145. It's balanced between the three classes. The [test dataset](https://github.com/agombert/textcat/data/HS_X_test.npy) has a length 2145. Thus we will be able to see the difference with the transfert learning method (BERT fine tuning).
@@ -58,10 +36,44 @@ I also computed the recall/precision for each class.
 |*Distilled BERT*|60.14%|68.58%|87.69%|77.22%|70.35%|71.25%|
 |*TFH Encod + GB*|86.85%|81.39%|76.50%|74.22%|67.69%|75.04%|
 
-* the size of the model does not take into account the encoder as it has been loaded from the hub and is not saved.
+\* the size of the model does not take into account the encoder as it has been loaded from the hub and is not saved.
 
+
+### Wine reviews
+
+Our [train dataset](https://github.com/agombert/textcat/data/Text_train.npy) has a length 4000. It's balanced between the four classes. The [test dataset](https://github.com/agombert/textcat/data/Text_test.npy) has a length 4000. Thus we will be able to see the difference with the transfert learning method (BERT fine tuning).
+
+For each algorithm I trained for 15 epochs with batch size 32 and a dropout at 0.5. 
+
+I computed the accuracy and the macro recall / macro precision for each model.
+
+|      Model     | Accuracy | Recall | Precision | Model Size|
+|:--------------:|:--------:|:------:|:---------:|:---------:|
+| *spaCy CNN*    |  47.45%  | 47.45% |   52.38%  |   5.3Mb   |
+|*BERT FineTuned*|  58.03%  | 58.03% |   61.15%  |   1.2Gb   |
+|*Distilled BERT*|  51.85%  | 51.85% |   53.29%  |   6.2MB   | 
+
+I also computed the recall/precision for each class. 
+
+|      Model     | Recall 0 | Precision 0 | Recall 1 | Precision 1 | Recall 2 | Precision 2 | Recall 3 | Precision 3 |
+|:--------------:|:--------:|:-----------:|:--------:|:-----------:|:--------:|:-----------:|:--------:|:-----------:|
+|*spaCy CNN*     |58.30%|35.55%|35.50%|39.10%|46.30%|75.78%|49.70%|59.10%|
+|*BERT FineTuned*|65.40%|80.54%|55.60%|49.12%|56.20%|43.74%|54.90%|71.21%|
+|*Distilled BERT*|46.40%|39.36%|43.20%|43.03%|59.40%|70.38%|58.40%|60.02%|
 
 ## Data
+
+### Hatred speech dataset
+
+For this experiment I used a [dataset of hatred speech](https://github.com/t-davidson/hate-speech-and-offensive-language) I found on Github. The speech is already labelled with 0 for hatred speech, 1 for offensive speech and 2 for neutral speech. I only managed to anonymized the tweets when there are some mention within the tweet.
+
+|   Class  | Label |
+|:--------:|:-----:|
+| Hatred   | 2     |
+| Offensive| 1     |
+| Neutral  | 0     |
+
+The objective is according to the text, rank the tweet.
 
 ### Wine dataset
 
@@ -77,18 +89,6 @@ For this experiment I used a [dataset of wine reviews](https://www.kaggle.com/zy
 The objective is according to the text, rank the review. In term or real like applications, we can use those kind of algorithms to detect hatred speech on any forum or twitter. We can also use those algorithms to assess the global opinion on a particular subject (movies, policies, branding...). It is classic sentiment analysis. 
 
 Here the difference is that we look at sentiment analysis with more than two labels (0-1) that we can easily find on tutorials.
-
-### Hatred speech dataset
-
-For this experiment I used a [dataset of hatred speech](https://github.com/t-davidson/hate-speech-and-offensive-language) I found on Github. The speech is already labelled with 0 for hatred speech, 1 for offensive speech and 2 for neutral speech. I only managed to anonymized the tweets when there are some mention within the tweet.
-
-|   Class  | Label |
-|:--------:|:-----:|
-| Hatred   | 2     |
-| Offensive| 1     |
-| Neutral  | 0     |
-
-The objective is according to the text, rank the tweet.
 
 ## spaCy textcat implementation
 
