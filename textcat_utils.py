@@ -1,4 +1,4 @@
-from os import path, getcwd
+from os import getcwd
 from os.path import join
 import numpy as np
 import pickle
@@ -19,7 +19,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 
 import tensorflow_hub as hub
 
-PATH_REPO = path.dirname(getcwd())
+PATH_REPO = getcwd()
 PATH_DATA = join(PATH_REPO, 'data')
 
 def load_data(name_features, name_labels=False):
