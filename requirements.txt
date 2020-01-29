@@ -1,4 +1,6 @@
-pandas
 spacy
 sklearn
 numpy
+tensorflow
+tensorflow_hub
+absl-py
