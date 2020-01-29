@@ -12,7 +12,7 @@ WORKDIR /classifiers/
 COPY . /classifiers/
 
 # pip install
-RUN pip install pip --upgrade && pip install numpy spacy sklearn jupyter pandas
+RUN pip install pip --upgrade && pip install -r requirements.txt
 
 # Make port available to the world outside this container
 EXPOSE 8888
