@@ -3,7 +3,7 @@ FROM python:3.6.9-slim-buster
 
 # Meta-data
 LABEL maintainer="Arnault Gombert <arnault.gombert@gmail.com>" \
-      description="Docker To train to detect hate speech"
+      description="Docker To train to detect hate speeches"
 
 # Set the working directory to /app
 WORKDIR /classifiers/
